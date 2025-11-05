@@ -13,34 +13,33 @@
         /* ESTABILIZACIÓN: Fuerza la relación de aspecto 1:1 para el gráfico */
         #chart-container {
             width: 100%;
-            max-width: 550px;
-            aspect-ratio: 1 / 1; 
+            max-width: 750px;
             margin: 0 auto;
         }
     </style>
 </head>
-<body class="bg-gray-100 p-4 md:p-8 font-sans">
+<body class="bg-slate-200 p-4 md:p-8 font-sans">
 
-    <div class="max-w-6xl mx-auto bg-white shadow-2xl shadow-purple-200 rounded-2xl p-6 md:p-10 border-t-8 border-purple-600">
-        <h1 class="text-3xl md:text-4xl font-extrabold text-purple-800 text-center mb-8">Sistema de Optimización de Personal para Control Total S.A.S</h1>
+    <div class="max-w-6xl mx-auto bg-slate-100 shadow-xl rounded-2xl p-6 md:p-10 border-t-4 border-indigo-500">
+        <h1 class="text-3xl md:text-4xl font-bold text-slate-800 text-center mb-8">Sistema de Optimización de Personal para Control Total S.A.S</h1>
         
         <!-- Resumen del Modelo Implementado -->
-        <div class="bg-purple-50 p-6 rounded-xl shadow-inner mb-10">
+        <div class="bg-white border border-slate-200 rounded-xl p-6 mb-10">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
                 <div>
-                    <h3 class="font-semibold text-lg text-purple-700">Variables de Decisión:</h3>
-                    <ul class="list-disc list-inside mt-1 text-gray-600">
-                        <li>**X:** Técnicos de Hora Pico</li>
-                        <li>**Y:** Técnicos de Horario Regular</li>
+                    <h3 class="font-bold text-xl text-slate-800">Variables de Decisión</h3>
+                    <ul class="list-disc list-inside mt-2 text-slate-600 space-y-1">
+                        <li><span class="font-semibold text-slate-700">X:</span> Técnicos de Hora Pico</li>
+                        <li><span class="font-semibold text-slate-700">Y:</span> Técnicos de Horario Regular</li>
                     </ul>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-lg text-purple-700">Función Objetivo (Z):</h3>
-                    <p class="bg-purple-200 text-purple-900 p-2 rounded font-mono text-center">MAX Z = 469.566(4X) + 469.566(3Y)</p>
+                    <h3 class="font-bold text-xl text-slate-800">Función Objetivo f(x,y)</h3>
+                    <p class="bg-slate-900 text-cyan-300 p-3 mt-2 rounded-lg font-mono text-center text-base">f (x,y)= 469.566(4X + 3Y)</p>
                 </div>
                 <div>
-                    <h3 class="font-semibold text-lg text-purple-700">Restricciones (Vinculantes):</h3>
-                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                    <h3 class="font-bold text-xl text-slate-800">Restricciones</h3>
+                    <ul class="mt-2 text-slate-600 space-y-1 font-mono">
                         <li id="restriction1Text">R1: X + Y ≤ 6</li>
                         <li id="restriction2Text">R2: 2X + Y ≤ 9</li>
                         <li>X, Y ≥ 0</li>
@@ -50,24 +49,27 @@
         </div>
 
         <!-- Controles Interactivos -->
-        <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-10">
-            <h3 class="font-semibold text-lg text-purple-700 mb-4">Controles Interactivos</h3>
+        <div class="bg-white p-6 rounded-xl border border-slate-200 mb-10">
+            <h3 class="font-semibold text-lg text-slate-700 mb-4">Controles Interactivos</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label for="r1Slider" class="block text-gray-700 font-medium">Límite R1 (X + Y ≤ <span id="r1Value" class="font-bold text-purple-700">6</span>)</label>
-                    <input id="r1Slider" type="range" min="1" max="20" value="6" class="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer">
+                    <label for="r1Slider" class="block text-slate-600 font-medium">Límite R1 (X + Y ≤ <span id="r1Value" class="font-bold text-indigo-600">6</span>)</label>
+                    <input id="r1Slider" type="range" min="1" max="20" value="6" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
                     <p id="r1Context" class="text-xs text-gray-500 mt-1">Representa el límite total de técnicos que se pueden contratar.</p>
                 </div>
                 <div>
-                    <label for="r2Slider" class="block text-gray-700 font-medium">Límite R2 (2X + Y ≤ <span id="r2Value" class="font-bold text-purple-700">9</span>)</label>
-                    <input id="r2Slider" type="range" min="1" max="20" value="9" class="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer">
+                    <label for="r2Slider" class="block text-slate-600 font-medium">Límite R2 (2X + Y ≤ <span id="r2Value" class="font-bold text-indigo-600">9</span>)</label>
+                    <input id="r2Slider" type="range" min="1" max="20" value="9" class="w-full h-2 bg-indigo-100 rounded-lg appearance-none cursor-pointer">
                     <p id="r2Context" class="text-xs text-gray-500 mt-1">Representa la carga de trabajo máxima soportada en horas pico.</p>
                 </div>
+            </div>
+            <div class="text-center mt-4">
+                <button id="resetButton" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition-colors">Restablecer Valores</button>
             </div>
         </div>
 
         <!-- Panel de Resultados -->
-        <div class="bg-green-100 border-l-4 border-green-600 text-green-800 p-4 rounded-lg mb-4" role="alert">
+        <div class="bg-emerald-50 border-l-4 border-emerald-500 text-emerald-800 p-4 rounded-lg mb-4" role="alert">
             <p class="font-bold text-xl">Solución Óptima (Método Simplex)</p>
             <div id="resultadoTexto" class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
                 <!-- El contenido se inyectará aquí desde JavaScript -->
@@ -81,43 +83,33 @@
     </div>
 
     <script>
-        let simplexChartInstance = null; // Variable global para la instancia del gráfico
+        let simplexChartInstance = null; // Almacena la instancia del gráfico para su posterior manipulación.
 
-        // CONSTANTES DEL MODELO
+        // Definición de las constantes fundamentales del modelo de negocio.
         const C_BASE = 469566;
         const C_X_REL = 4; 
         const C_Y_REL = 3; 
 
-        // Función para calcular intersección (ahora recibe los límites)
+        // Esta función calcula el punto de intersección entre las dos rectas de restricción.
         function calcularInterseccion(r1Limit, r2Limit) {
             const x = r2Limit - r1Limit;
             const y = 2 * r1Limit - r2Limit;
             return { x, y };
         }
 
+        // Esta función verifica si un punto (x, y) cumple con todas las restricciones del problema.
         function esPuntoFactible(x, y, r1Limit, r2Limit) {
             return (
-                x >= 0 && y >= 0 &&           // No negatividad
-                x + y <= r1Limit &&          // R1
-                2*x + y <= r2Limit           // R2
+                x >= 0 && y >= 0 &&           // Se asegura que las variables de decisión no sean negativas.
+                x + y <= r1Limit &&          // Valida el cumplimiento de la primera restricción.
+                2*x + y <= r2Limit           // Valida el cumplimiento de la segunda restricción.
             );
         }
 
-        // Función para evaluar Z en un punto
-        function evaluarZ(x, y) {
-            return C_BASE * (C_X_REL * x + C_Y_REL * y);
-        }
-
-        /**
-         * Resuelve un problema de programación lineal usando el Método Simplex.
-         * Asume un problema de maximización con restricciones <=.
-         * @returns {{x: number, y: number, z: number}} El punto óptimo y el valor máximo de Z.
-         */
+        // Implementación del Método Simplex para resolver el problema de programación lineal.
         function solveWithSimplex(r1Limit, r2Limit) {
-            // 1. Configurar el Tableau Simplex Inicial
-            // Z - (C_X_REL*C_BASE)X - (C_Y_REL*C_BASE)Y = 0
-            // X + Y + s1 = r1Limit
-            // 2X + Y + s2 = r2Limit
+            // Paso 1: Se configura la matriz inicial, conocida como Tableau Simplex,
+            // convirtiendo las inecuaciones en ecuaciones con variables de holgura (s1, s2).
             let tableau = [
                 // Z,  X,                Y,                s1, s2, Solución
                 [1, -(C_X_REL * C_BASE), -(C_Y_REL * C_BASE), 0,  0,  0],        // Fila Z (Función Objetivo)
@@ -125,23 +117,23 @@
                 [0, 2,                1,                0,  1,  r2Limit]  // Fila s2 (Restricción 2)
             ];
 
-            const MAX_ITERATIONS = 10; // Para evitar bucles infinitos
+            const MAX_ITERATIONS = 10; // Se establece un límite de iteraciones para prevenir bucles infinitos.
             for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
-                // 2. Encontrar la columna pivote (el más negativo en la fila Z)
+                // Paso 2: Se busca la columna pivote, que corresponde al valor más negativo en la fila Z.
                 const zRow = tableau[0];
                 let pivotColIndex = -1;
                 let minZValue = 0;
-                for (let j = 1; j < zRow.length - 1; j++) { // Ignorar Z y Solución
+                for (let j = 1; j < zRow.length - 1; j++) { // Se examinan solo las columnas de las variables de decisión.
                     if (zRow[j] < minZValue) {
                         minZValue = zRow[j];
                         pivotColIndex = j;
                     }
                 }
 
-                // 3. Si no hay negativos, hemos llegado a la solución óptima
+                // Paso 3: Si no existen valores negativos en la fila Z, se ha alcanzado la solución óptima.
                 if (pivotColIndex === -1) break;
 
-                // 4. Encontrar la fila pivote (menor ratio positivo)
+                // Paso 4: Se determina la fila pivote calculando el ratio entre la solución y la columna pivote.
                 let pivotRowIndex = -1;
                 let minRatio = Infinity;
                 for (let i = 1; i < tableau.length; i++) {
@@ -155,13 +147,13 @@
                     }
                 }
 
-                // 5. Realizar el pivoteo
+                // Paso 5: Se realizan las operaciones de fila para pivotar sobre el elemento seleccionado.
                 const pivotElement = tableau[pivotRowIndex][pivotColIndex];
-                // Normalizar la fila pivote
+                // Se normaliza la fila pivote dividiéndola por el elemento pivote.
                 for (let j = 0; j < tableau[pivotRowIndex].length; j++) {
                     tableau[pivotRowIndex][j] /= pivotElement;
                 }
-                // Hacer ceros en las otras filas de la columna pivote
+                // Se convierten los demás elementos de la columna pivote en cero mediante operaciones de fila.
                 for (let i = 0; i < tableau.length; i++) {
                     if (i !== pivotRowIndex) {
                         const factor = tableau[i][pivotColIndex];
@@ -175,11 +167,7 @@
             return extractSolutionFromTableau(tableau);
         }
 
-        /**
-         * Extrae los valores de las variables de decisión del tableau final.
-         * @param {number[][]} tableau - El tableau Simplex final.
-         * @returns {{x: number, y: number, z: number}} La solución.
-         */
+        // Procesa el tableau final para identificar los valores de las variables en la solución óptima.
         function extractSolutionFromTableau(tableau) {
             const numRows = tableau.length;
             const numCols = tableau[0].length;
@@ -187,7 +175,7 @@
             let solution = { x: 0, y: 0, z: tableau[0][solutionColIndex] };
 
             // Las variables de decisión son X (col 1) y Y (col 2)
-            for (let j = 1; j <= 2; j++) { // j=1 para X, j=2 para Y
+            for (let j = 1; j <= 2; j++) {
                 let isBasic = false;
                 let pivotRow = -1;
                 let oneCount = 0;
@@ -202,7 +190,7 @@
                     }
                 }
 
-                if (oneCount === 1 && zeroCount === numRows - 2) { // Es una variable básica
+                if (oneCount === 1 && zeroCount === numRows - 2) { // Si la columna es una variable básica, se extrae su valor.
                     if (j === 1) solution.x = tableau[pivotRow][solutionColIndex];
                     if (j === 2) solution.y = tableau[pivotRow][solutionColIndex];
                 }
@@ -210,71 +198,67 @@
             return solution;
         }
 
+        // Esta función actualiza el panel de resultados con la solución encontrada.
+        function mostrarResultados(x, y, z) {
+            document.getElementById('resultadoTexto').innerHTML = `
+                <div class="col-span-2">
+                    <span class="text-lg">Ganancia Máxima:</span>
+                    <span class="font-bold text-2xl text-emerald-900 ml-2">${formatCurrency(z)}</span>
+                    <span class="font-mono text-sm ml-2">en (${x.toFixed(1)}, ${y.toFixed(1)})</span>
+                </div>
+                <div><span class="font-semibold">${x.toFixed(0)}</span> Técnicos de Hora Pico (X)</div>
+                <div><span class="font-semibold">${y.toFixed(0)}</span> Técnicos de Horario Regular (Y)</div>
+            `;
+        }
+
+
+        // Esta función formatea un número como moneda colombiana (COP).
         function formatCurrency(value) {
             return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
         }
 
+        // Implementación de la técnica "Debounce" para optimizar el rendimiento de los sliders.
+        function debounce(func, delay) {
+            let timeout;
+            return function(...args) {
+                const context = this;
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(context, args), delay);
+            };
+        }
+
+        // Se crea una versión "debounced" de la función de análisis para evitar ejecuciones excesivas.
+        const debouncedUpdate = debounce(updateAnalysis, 250); // El cálculo se ejecuta 250ms después de que el usuario deja de interactuar.
+
+        // Función principal que se ejecuta para actualizar todo el análisis y la visualización.
         function updateAnalysis() {
             const r1Limit = parseFloat(document.getElementById('r1Slider').value);
             const r2Limit = parseFloat(document.getElementById('r2Slider').value);
 
-            // Actualizar etiquetas de los sliders
+            // Se actualizan las etiquetas de la interfaz con los valores actuales de los sliders.
             document.getElementById('r1Value').textContent = r1Limit;
             document.getElementById('r2Value').textContent = r2Limit;
 
-            // Actualizar texto de las restricciones en el resumen
+            // Se actualiza dinámicamente el texto de las restricciones en el resumen del modelo.
             document.getElementById('restriction1Text').textContent = `R1: X + Y ≤ ${r1Limit}`;
             document.getElementById('restriction2Text').textContent = `R2: 2X + Y ≤ ${r2Limit}`;
 
-            // --- CÁLCULO DE VÉRTICES Y ÓPTIMO ---
-            const puntoCruce = calcularInterseccion(r1Limit, r2Limit);
-
-            const vertices = [
-                {x: 0, y: 0},
-                {x: r2Limit / 2, y: 0},
-                puntoCruce,
-                {x: 0, y: r1Limit}
-            ].filter(p => esPuntoFactible(p.x, p.y, r1Limit, r2Limit)); // Filtrar solo los vértices válidos
-
-            const solucionSimplex = solveWithSimplex(r1Limit, r2Limit);
-            const xOptimo = solucionSimplex.x;
-            const yOptimo = solucionSimplex.y;
-            const valorOptimo = solucionSimplex.z;
-
-            document.getElementById('resultadoTexto').innerHTML = `
-                <div class="col-span-2">
-                    <span class="text-lg">Ganancia Máxima (Z):</span>
-                    <span class="font-bold text-2xl text-green-900 ml-2">${formatCurrency(valorOptimo)}</span>
-                    <span class="font-mono text-sm ml-2">en (${xOptimo.toFixed(2)}, ${yOptimo.toFixed(2)})</span>
-                </div>
-                <div><span class="font-semibold">${xOptimo.toFixed(0)}</span> Técnicos de Hora Pico (X)</div>
-                <div><span class="font-semibold">${yOptimo.toFixed(0)}</span> Técnicos de Horario Regular (Y)</div>
-            `;
-
-            const valorRelativoOptimo = C_X_REL * xOptimo + C_Y_REL * yOptimo;
-
-            // --- PREPARACIÓN DE DATOS PARA EL GRÁFICO ---
-            const MAX_AXIS = 20;
+            // Se preparan los datos necesarios para la construcción del gráfico.
+            const maxX = Math.max(r1Limit, r2Limit / 2) + 2; // Límite dinámico para el eje X
+            const maxY = Math.max(r1Limit, r2Limit) + 2;     // Límite dinámico para el eje Y
             const r1Points = [], r2Points = [], foLinePoints = [];
 
-            for(let x = 0; x <= MAX_AXIS; x += 0.1) {
+            // Se generan los puntos para las líneas de restricción.
+            for(let x = 0; x <= maxX; x += 0.2) { // Iterar hasta el máximo de X
                 let y1 = r1Limit - x;
                 if (y1 >= 0) r1Points.push({x: x, y: y1});
 
                 let y2 = r2Limit - 2 * x;
                 if (y2 >= 0) r2Points.push({x: x, y: y2});
-                
-                let y_fo = (valorRelativoOptimo - C_X_REL * x) / C_Y_REL;
-                if (y_fo >= 0) foLinePoints.push({x: x, y: y_fo});
             }
             
-            // --- CREACIÓN DEL GRÁFICO ---
-            if (simplexChartInstance) {
-                simplexChartInstance.destroy(); // Destruir el gráfico anterior
-            }
-            const ctx = document.getElementById('simplexChart').getContext('2d');
-            
-            simplexChartInstance = new Chart(ctx, {
+            // Se define la configuración base del gráfico que se mostrará.
+            const chartConfig = {
                 type: 'scatter',
                 data: {
                     datasets: [
@@ -293,35 +277,6 @@
                             borderWidth: 3,
                             showLine: true,
                             pointRadius: 0
-                        },
-                        {
-                            label: 'Región Factible',
-                            data: vertices.concat(vertices[0]), // Cerrar el polígono
-                            backgroundColor: 'rgba(168, 85, 247, 0.3)', 
-                            borderColor: 'rgba(168, 85, 247, 0.7)',
-                            borderWidth: 1,
-                            fill: true,
-                            showLine: true,
-                            tension: 0,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Función Objetivo (Z máx)',
-                            data: foLinePoints,
-                            borderColor: 'rgb(22, 163, 74)', 
-                            borderWidth: 3,
-                            borderDash: [10, 5],
-                            showLine: true,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Punto Óptimo',
-                            data: [{x: xOptimo, y: yOptimo, label: `Óptimo (${xOptimo}, ${yOptimo})`}],
-                            backgroundColor: 'rgb(255, 193, 7)', 
-                            borderColor: 'rgb(0, 0, 0)',
-                            borderWidth: 1,
-                            pointRadius: 8,
-                            pointStyle: 'star'
                         }
                     ]
                 },
@@ -334,7 +289,7 @@
                             callbacks: {
                                 label: function(context) {
                                     if (context.dataset.label === 'Punto Óptimo') {
-                                        return `Óptimo: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)}) - Z = ${formatCurrency(valorOptimo)}`;
+                                        return `Óptimo: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
                                     }
                                     return `${context.dataset.label}: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
                                 }
@@ -342,18 +297,72 @@
                         }
                     },
                     scales: {
-                        x: { min: 0, max: MAX_AXIS, title: { display: true, text: 'X (Técnicos de Hora Pico)', font: { size: 14, weight: 'bold' } } },
-                        y: { min: 0, max: MAX_AXIS, title: { display: true, text: 'Y (Técnicos de Horario Regular)', font: { size: 14, weight: 'bold' } } }
+                        x: { min: 0, max: maxX, title: { display: true, text: 'X (Técnicos de Hora Pico)', font: { size: 14, weight: 'bold' } } },
+                        y: { min: 0, max: maxY, title: { display: true, text: 'Y (Técnicos de Horario Regular)', font: { size: 14, weight: 'bold' } } }
                     }
                 }
-            });
+            };
+
+            // Se inicia la lógica de solución y la actualización de la interfaz de usuario.
+            const puntoCruce = calcularInterseccion(r1Limit, r2Limit);
+
+            // Se verifica si existe una solución factible con las restricciones actuales.
+            if (!esPuntoFactible(puntoCruce.x, puntoCruce.y, r1Limit, r2Limit)) {
+                document.getElementById('resultadoTexto').innerHTML = `<p class="text-red-600 font-bold text-lg col-span-2">No existe una solución óptima con los límites actuales. Las restricciones son inconsistentes.</p>`;
+            } else {
+                // Si hay solución, se ejecuta el Simplex y se muestran los resultados.
+                const solucionSimplex = solveWithSimplex(r1Limit, r2Limit);
+                const xOptimo = solucionSimplex.x;
+                const yOptimo = solucionSimplex.y;
+                const valorOptimo = solucionSimplex.z;
+
+                mostrarResultados(xOptimo, yOptimo, valorOptimo);
+
+                // Se añaden al gráfico los elementos visuales de la solución, como la función objetivo y el punto óptimo.
+                const valorRelativoOptimo = C_X_REL * xOptimo + C_Y_REL * yOptimo;
+                for(let x = 0; x <= maxX; x += 0.2) { // Iterar hasta el máximo de X
+                    let y_fo = (valorRelativoOptimo - C_X_REL * x) / C_Y_REL;
+                    if (y_fo >= 0) foLinePoints.push({x: x, y: y_fo});
+                }
+
+                chartConfig.data.datasets.push({
+                    label: 'Función Objetivo (Z máx)',
+                    data: foLinePoints,
+                    borderColor: 'rgb(22, 163, 74)', 
+                    borderWidth: 3,
+                    borderDash: [10, 5],
+                    showLine: true,
+                    pointRadius: 0
+                });
+                chartConfig.data.datasets.push({
+                    label: 'Punto Óptimo',
+                    data: [{x: xOptimo, y: yOptimo}],
+                    backgroundColor: 'rgb(255, 193, 7)', 
+                    borderColor: 'rgb(0, 0, 0)',
+                    borderWidth: 1,
+                    pointRadius: 8,
+                    pointStyle: 'star'
+                });
+            }
+
+            // Finalmente, se renderiza el gráfico en la interfaz.
+            if (simplexChartInstance) simplexChartInstance.destroy();
+            const ctx = document.getElementById('simplexChart').getContext('2d');
+            simplexChartInstance = new Chart(ctx, chartConfig);
         }
 
-        // Event Listeners para los sliders
-        document.getElementById('r1Slider').addEventListener('input', updateAnalysis);
-        document.getElementById('r2Slider').addEventListener('input', updateAnalysis);
+        // Se asignan los eventos de interacción a los elementos de la interfaz.
+        document.getElementById('r1Slider').addEventListener('input', debouncedUpdate);
+        document.getElementById('r2Slider').addEventListener('input', debouncedUpdate);
 
-        // Carga inicial
+        // Evento para el botón que restablece los valores a su estado inicial.
+        document.getElementById('resetButton').addEventListener('click', () => {
+            document.getElementById('r1Slider').value = 6;
+            document.getElementById('r2Slider').value = 9;
+            document.getElementById('r1Slider').dispatchEvent(new Event('input'));
+        });
+
+        // Se ejecuta un análisis inicial al cargar la página por primera vez.
         window.onload = updateAnalysis;
     </script>
 </body>
