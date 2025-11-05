@@ -3,568 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Total S.A.S - Sistema de Gestión</title>
+    <title>Optimizador de Personal - Cálculo Dinámico</title>
+    <!-- Incluye Tailwind CSS CDN para el estilo -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluye la librería de Chart.js para dibujar gráficos -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
     <style>
-        body {
-            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
-            min-height: 100vh;
-        }
-        .glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+        /* ESTABILIZACIÓN: Fuerza la relación de aspecto 1:1 para el gráfico */
+        #chart-container {
+            width: 100%;
+            max-width: 550px;
+            aspect-ratio: 1 / 1; 
+            margin: 0 auto;
         }
     </style>
 </head>
-<body class="p-8">
-    <div id="app" class="max-w-7xl mx-auto">
-        <!-- Header -->
-        <div class="glass rounded-2xl p-8 mb-8">
-            <h1 class="text-4xl font-bold text-white mb-2">Control Total S.A.S</h1>
-            <p class="text-blue-200">Sistema de Análisis de Inversión y Gestión de Servicios</p>
+<body class="bg-gray-100 p-4 md:p-8 font-sans">
+
+    <div class="max-w-6xl mx-auto bg-white shadow-2xl shadow-purple-200 rounded-2xl p-6 md:p-10 border-t-8 border-purple-600">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-purple-800 text-center mb-8">Sistema de Optimización de Personal para Control Total S.A.S</h1>
+        
+        <!-- Resumen del Modelo Implementado -->
+        <div class="bg-purple-50 p-6 rounded-xl shadow-inner mb-10">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div>
+                    <h3 class="font-semibold text-lg text-purple-700">Variables de Decisión:</h3>
+                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                        <li>**X:** Técnicos de Hora Pico</li>
+                        <li>**Y:** Técnicos de Horario Regular</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-purple-700">Función Objetivo (Z):</h3>
+                    <p class="bg-purple-200 text-purple-900 p-2 rounded font-mono text-center">MAX Z = 469.566(4X) + 469.566(3Y)</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-lg text-purple-700">Restricciones (Vinculantes):</h3>
+                    <ul class="list-disc list-inside mt-1 text-gray-600">
+                        <li id="restriction1Text">R1: X + Y ≤ 6</li>
+                        <li id="restriction2Text">R2: 2X + Y ≤ 9</li>
+                        <li>X, Y ≥ 0</li>
+                    </ul>
+                </div>
+            </div>
         </div>
 
-        <!-- Formulario de Entrada -->
-        <div id="inputSection">
-            <div class="glass rounded-2xl p-8 border border-white/20 mb-6">
-                <div class="flex items-center space-x-3 mb-6">
-                    <svg class="text-yellow-400" width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="8" x2="12" y2="12"></line>
-                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                    </svg>
-                    <h2 class="text-2xl font-bold text-white">Ingreso de Variables de Entrada</h2>
+        <!-- Controles Interactivos -->
+        <div class="bg-gray-50 p-6 rounded-xl shadow-inner mb-10">
+            <h3 class="font-semibold text-lg text-purple-700 mb-4">Controles Interactivos</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="r1Slider" class="block text-gray-700 font-medium">Límite R1 (X + Y ≤ <span id="r1Value" class="font-bold text-purple-700">6</span>)</label>
+                    <input id="r1Slider" type="range" min="1" max="20" value="6" class="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer">
+                    <p id="r1Context" class="text-xs text-gray-500 mt-1">Representa el límite total de técnicos que se pueden contratar.</p>
                 </div>
-                
-                <div class="space-y-6">
-                    <div>
-                        <h3 class="text-xl font-bold text-white mb-4">Datos Financieros</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label class="block text-blue-200 mb-2">Inversión Inicial ($)</label>
-                                <input type="number" id="inversionInicial" class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-400" placeholder="Ej: 100000">
-                            </div>
-                            <div>
-                                <label class="block text-blue-200 mb-2">Tasa de Descuento (%)</label>
-                                <input type="number" step="0.1" id="tasaDescuento" class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-400" placeholder="Ej: 10">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-blue-200 mb-2">Ingresos Proyectados por Mes (12 valores separados por comas)</label>
-                        <input type="text" id="ingresosProyectados" class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-400" placeholder="Ej: 15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000,15000">
-                    </div>
-
-                    <div>
-                        <label class="block text-blue-200 mb-2">Costos Operativos por Mes (12 valores separados por comas)</label>
-                        <input type="text" id="costosOperativos" class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-400" placeholder="Ej: 8000,8000,8000,8000,8000,8000,8000,8000,8000,8000,8000,8000">
-                    </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-blue-200 mb-2">Personal Disponible (empleados)</label>
-                            <input type="number" id="personalDisponible" class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-400" placeholder="Ej: 15">
-                        </div>
-                        <div>
-                            <label class="block text-blue-200 mb-2">Presupuesto Disponible ($)</label>
-                            <input type="number" id="presupuestoDisponible" class="w-full bg-white/5 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-400" placeholder="Ej: 50000">
-                        </div>
-                    </div>
+                <div>
+                    <label for="r2Slider" class="block text-gray-700 font-medium">Límite R2 (2X + Y ≤ <span id="r2Value" class="font-bold text-purple-700">9</span>)</label>
+                    <input id="r2Slider" type="range" min="1" max="20" value="9" class="w-full h-2 bg-purple-200 rounded-lg appearance-none cursor-pointer">
+                    <p id="r2Context" class="text-xs text-gray-500 mt-1">Representa la carga de trabajo máxima soportada en horas pico.</p>
                 </div>
             </div>
-
-            <div class="glass rounded-2xl p-8 border border-white/20 mb-6">
-                <h3 class="text-xl font-bold text-white mb-4">Datos Históricos de Demanda</h3>
-                <p class="text-blue-200 mb-4">Ingresa el número de clientes por horario para cada día</p>
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-white">
-                        <thead>
-                            <tr class="border-b border-white/20">
-                                <th class="text-left p-3">Día</th>
-                                <th class="text-center p-3">Mañana</th>
-                                <th class="text-center p-3">Tarde</th>
-                                <th class="text-center p-3">Noche</th>
-                            </tr>
-                        </thead>
-                        <tbody id="demandaTable">
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Lunes</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Martes</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Miércoles</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Jueves</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Viernes</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Sábado</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                            <tr class="border-b border-white/10">
-                                <td class="p-3 font-semibold">Domingo</td>
-                                <td class="text-center p-3"><input type="number" class="demanda-manana w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-tarde w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                                <td class="text-center p-3"><input type="number" class="demanda-noche w-20 bg-white/5 border border-white/20 rounded px-2 py-1 text-center text-white" placeholder="0"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <button onclick="procesarDatos()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 px-8 rounded-xl hover:from-blue-600 hover:to-purple-700 transition-all shadow-lg">
-                Procesar Datos y Generar Análisis
-            </button>
         </div>
 
-        <!-- Sección de Resultados -->
-        <div id="resultsSection" style="display: none;">
-            <div class="glass rounded-2xl p-8 mb-8 border border-white/20">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h1 class="text-4xl font-bold text-white mb-2">Control Total S.A.S</h1>
-                        <p class="text-blue-200">Resultados del Análisis</p>
-                    </div>
-                    <button onclick="volverInput()" class="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg transition-all">
-                        Modificar Datos
-                    </button>
-                </div>
+        <!-- Panel de Resultados -->
+        <div class="bg-green-100 border-l-4 border-green-600 text-green-800 p-4 rounded-lg mb-4" role="alert">
+            <p class="font-bold text-xl">Solución Óptima (Método Simplex)</p>
+            <div id="resultadoTexto" class="mt-2 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+                <!-- El contenido se inyectará aquí desde JavaScript -->
             </div>
+        </div>
 
-            <!-- Tabs -->
-            <div class="flex space-x-2 mb-8 glass rounded-xl p-2 border border-white/10">
-                <button onclick="cambiarTab('financial')" id="tabFinancial" class="flex items-center space-x-2 px-6 py-3 rounded-lg transition-all bg-blue-500 text-white shadow-lg">
-                    <span>Análisis Financiero</span>
-                </button>
-                <button onclick="cambiarTab('demand')" id="tabDemand" class="flex items-center space-x-2 px-6 py-3 rounded-lg transition-all text-blue-200 hover:bg-white/10">
-                    <span>Predicción de Demanda</span>
-                </button>
-                <button onclick="cambiarTab('resources')" id="tabResources" class="flex items-center space-x-2 px-6 py-3 rounded-lg transition-all text-blue-200 hover:bg-white/10">
-                    <span>Optimización de Recursos</span>
-                </button>
-                <button onclick="cambiarTab('report')" id="tabReport" class="flex items-center space-x-2 px-6 py-3 rounded-lg transition-all text-blue-200 hover:bg-white/10">
-                    <span>Reporte Final</span>
-                </button>
-            </div>
-
-            <!-- Contenido de los Tabs -->
-            <div id="contentFinancial" class="tab-content">
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-white font-semibold mb-2">ROI Calculado</h3>
-                            <p id="roiValue" class="text-4xl font-bold text-white">0%</p>
-                            <p class="text-green-100 text-sm mt-2">Retorno sobre Inversión</p>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-white font-semibold mb-2">VAN Calculado</h3>
-                            <p id="vanValue" class="text-4xl font-bold text-white">$0</p>
-                            <p class="text-blue-100 text-sm mt-2">Valor Actual Neto</p>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-white font-semibold mb-2">TIR Calculada</h3>
-                            <p id="tirValue" class="text-4xl font-bold text-white">0%</p>
-                            <p class="text-purple-100 text-sm mt-2">Tasa Interna de Retorno</p>
-                        </div>
-                    </div>
-
-                    <div class="glass rounded-2xl p-6 border border-white/20">
-                        <h3 class="text-2xl font-bold text-white mb-6">Flujo de Caja Proyectado</h3>
-                        <canvas id="flujoCajaChart" height="100"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div id="contentDemand" class="tab-content" style="display: none;">
-                <div class="space-y-6">
-                    <div class="glass rounded-2xl p-6 border border-white/20">
-                        <h3 class="text-2xl font-bold text-white mb-6">Comparación: Demanda Histórica vs Predicha</h3>
-                        <canvas id="demandaChart" height="100"></canvas>
-                    </div>
-
-                    <div class="glass rounded-2xl p-6 border border-white/20">
-                        <h3 class="text-xl font-bold text-white mb-4">Matriz de Demanda por Horario</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-white">
-                                <thead>
-                                    <tr class="border-b border-white/20">
-                                        <th class="text-left p-3">Día</th>
-                                        <th class="text-center p-3">Mañana</th>
-                                        <th class="text-center p-3">Tarde</th>
-                                        <th class="text-center p-3">Noche</th>
-                                        <th class="text-center p-3">Total Predicho</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="demandaPredictedTable"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="contentResources" class="tab-content" style="display: none;">
-                <div class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-white font-semibold mb-2">Personal Disponible</h3>
-                            <p id="personalValue" class="text-4xl font-bold text-white">0</p>
-                            <p class="text-cyan-100 text-sm mt-2">Empleados totales</p>
-                        </div>
-
-                        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-6 shadow-xl">
-                            <h3 class="text-white font-semibold mb-2">Presupuesto Disponible</h3>
-                            <p id="presupuestoValue" class="text-4xl font-bold text-white">$0</p>
-                            <p class="text-emerald-100 text-sm mt-2">Para recursos</p>
-                        </div>
-                    </div>
-
-                    <div class="glass rounded-2xl p-6 border border-white/20">
-                        <h3 class="text-2xl font-bold text-white mb-6">Plan de Optimización de Recursos</h3>
-                        <p class="text-blue-200 mb-4">Asignación Óptima de Personal por Horario</p>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-white">
-                                <thead>
-                                    <tr class="border-b border-white/20">
-                                        <th class="text-left p-3">Día</th>
-                                        <th class="text-center p-3">Mañana</th>
-                                        <th class="text-center p-3">Tarde</th>
-                                        <th class="text-center p-3">Noche</th>
-                                        <th class="text-center p-3">Total</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="asignacionTable"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="glass rounded-2xl p-6 border border-white/20">
-                        <h3 class="text-xl font-bold text-white mb-4">Distribución de Personal</h3>
-                        <canvas id="personalChart" height="80"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <div id="contentReport" class="tab-content" style="display: none;">
-                <div class="space-y-6">
-                    <div class="glass rounded-2xl p-8 border border-white/20">
-                        <h2 class="text-3xl font-bold text-white mb-6">Reporte Financiero</h2>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-                            <div class="bg-white/5 rounded-xl p-6">
-                                <p class="text-blue-200 text-sm mb-2">ROI Calculado</p>
-                                <p id="reportRoi" class="text-4xl font-bold text-green-400">0%</p>
-                            </div>
-                            <div class="bg-white/5 rounded-xl p-6">
-                                <p class="text-blue-200 text-sm mb-2">VAN Calculado</p>
-                                <p id="reportVan" class="text-4xl font-bold text-blue-400">$0</p>
-                            </div>
-                            <div class="bg-white/5 rounded-xl p-6">
-                                <p class="text-blue-200 text-sm mb-2">TIR Calculada</p>
-                                <p id="reportTir" class="text-4xl font-bold text-purple-400">0%</p>
-                            </div>
-                        </div>
-                        
-                        <div class="bg-white/5 rounded-xl p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">Análisis de Resultados</h3>
-                            <div id="reportAnalysis" class="space-y-3 text-blue-100"></div>
-                        </div>
-                    </div>
-
-                    <div class="glass rounded-2xl p-8 border border-white/20">
-                        <h2 class="text-3xl font-bold text-white mb-6">Gráfico de Demanda</h2>
-                        <p class="text-blue-200 mb-4">Comparación entre demanda histórica y predicha por machine learning</p>
-                        <canvas id="demandaReportChart" height="80"></canvas>
-                        
-                        <div class="bg-white/5 rounded-xl p-6 mt-6">
-                            <h3 class="text-xl font-bold text-white mb-4">Insights de Demanda</h3>
-                            <div class="space-y-3 text-blue-100">
-                                <p>• Se aplicó un modelo de machine learning simplificado para predicción.</p>
-                                <p>• Se predice un incremento del 8% en horarios de mañana y 12% en tarde.</p>
-                                <p>• Los horarios de noche tienen un crecimiento estimado del 5%.</p>
-                                <p id="totalClientes">• Total de clientes predichos: 0</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="glass rounded-2xl p-8 border border-white/20">
-                        <h2 class="text-3xl font-bold text-white mb-6">Plan de Optimización de Recursos</h2>
-                        <p id="reportPersonal" class="text-blue-200 mb-6">Distribución óptima de empleados según demanda predicha</p>
-                        
-                        <div class="overflow-x-auto mb-6">
-                            <table class="w-full text-white">
-                                <thead>
-                                    <tr class="border-b border-white/20">
-                                        <th class="text-left p-3">Día</th>
-                                        <th class="text-center p-3">Mañana</th>
-                                        <th class="text-center p-3">Tarde</th>
-                                        <th class="text-center p-3">Noche</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="reportAsignacionTable"></tbody>
-                            </table>
-                        </div>
-
-                        <div class="bg-white/5 rounded-xl p-6">
-                            <h3 class="text-xl font-bold text-white mb-4">Recomendaciones Operativas</h3>
-                            <div class="space-y-3 text-blue-100">
-                                <p>• Asignar más personal en horarios de mayor demanda predicha.</p>
-                                <p>• Optimizar recursos en días de menor afluencia para reducir costos.</p>
-                                <p>• Implementar turnos rotativos para maximizar eficiencia.</p>
-                                <p id="reportPresupuesto">• Presupuesto disponible para capacitación y recursos.</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="bg-gradient-to-r from-green-500/20 to-blue-500/20 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-                        <h2 class="text-3xl font-bold text-white mb-4">Conclusiones</h2>
-                        <div id="reportConclusiones" class="space-y-4 text-blue-100 text-lg"></div>
-                    </div>
-                </div>
-            </div>
+        <!-- Contenedor del Gráfico -->
+        <div id="chart-container" class="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mt-6">
+            <canvas id="simplexChart"></canvas>
         </div>
     </div>
 
     <script>
-        let charts = {};
-        let datosGlobales = {};
+        let simplexChartInstance = null; // Variable global para la instancia del gráfico
 
-        // Función Calcular_ROI
-        function calcularROI(inversion, ingresos, costos) {
-            const ingresoTotal = ingresos.reduce((a, b) => a + b, 0);
-            const costoTotal = costos.reduce((a, b) => a + b, 0);
-            const ganancia = ingresoTotal - costoTotal - inversion;
-            const roi = (ganancia / inversion) * 100;
-            return roi.toFixed(2);
+        // CONSTANTES DEL MODELO
+        const C_BASE = 469566;
+        const C_X_REL = 4; 
+        const C_Y_REL = 3; 
+
+        // Función para calcular intersección (ahora recibe los límites)
+        function calcularInterseccion(r1Limit, r2Limit) {
+            const x = r2Limit - r1Limit;
+            const y = 2 * r1Limit - r2Limit;
+            return { x, y };
         }
 
-        // Función Calcular_VAN
-        function calcularVAN(inversion, ingresos, costos, tasa) {
-            let van = -inversion;
-            
-            for (let i = 0; i < ingresos.length; i++) {
-                const flujoNeto = ingresos[i] - costos[i];
-                van += flujoNeto / Math.pow(1 + tasa, i + 1);
-            }
-            
-            return van.toFixed(2);
-        }
-
-        // Función Calcular_TIR
-        function calcularTIR(inversion, ingresos, costos) {
-            const flujos = [-inversion];
-            
-            for (let i = 0; i < ingresos.length; i++) {
-                flujos.push(ingresos[i] - costos[i]);
-            }
-            
-            let tir = 0.10;
-            for (let j = 0; j < 100; j++) {
-                let van = 0;
-                for (let i = 0; i < flujos.length; i++) {
-                    van += flujos[i] / Math.pow(1 + tir, i);
-                }
-                if (Math.abs(van) < 1) break;
-                tir += van > 0 ? 0.001 : -0.001;
-            }
-            
-            return (tir * 100).toFixed(2);
-        }
-
-        // Función Predecir_Demanda
-        function predecirDemanda(datosHistoricos) {
-            return datosHistoricos.map(dia => ({
-                ...dia,
-                mananaPredicha: Math.round(parseFloat(dia.manana) * 1.08),
-                tardePredicha: Math.round(parseFloat(dia.tarde) * 1.12),
-                nochePredicha: Math.round(parseFloat(dia.noche) * 1.05)
-            }));
-        }
-
-        // Función Asignar_Personal
-        function asignarPersonal(demandaPred, personalTotal) {
-            const demandaTotal = demandaPred.reduce((acc, dia) => 
-                acc + dia.mananaPredicha + dia.tardePredicha + dia.nochePredicha, 0
+        function esPuntoFactible(x, y, r1Limit, r2Limit) {
+            return (
+                x >= 0 && y >= 0 &&           // No negatividad
+                x + y <= r1Limit &&          // R1
+                2*x + y <= r2Limit           // R2
             );
-            
-            return demandaPred.map(dia => {
-                const demandaDia = dia.mananaPredicha + dia.tardePredicha + dia.nochePredicha;
-                const proporcion = demandaDia / demandaTotal;
-                const personalDia = Math.round(personalTotal * proporcion * 7);
+        }
+
+        // Función para evaluar Z en un punto
+        function evaluarZ(x, y) {
+            return C_BASE * (C_X_REL * x + C_Y_REL * y);
+        }
+
+        /**
+         * Resuelve un problema de programación lineal usando el Método Simplex.
+         * Asume un problema de maximización con restricciones <=.
+         * @returns {{x: number, y: number, z: number}} El punto óptimo y el valor máximo de Z.
+         */
+        function solveWithSimplex(r1Limit, r2Limit) {
+            // 1. Configurar el Tableau Simplex Inicial
+            // Z - (C_X_REL*C_BASE)X - (C_Y_REL*C_BASE)Y = 0
+            // X + Y + s1 = r1Limit
+            // 2X + Y + s2 = r2Limit
+            let tableau = [
+                // Z,  X,                Y,                s1, s2, Solución
+                [1, -(C_X_REL * C_BASE), -(C_Y_REL * C_BASE), 0,  0,  0],        // Fila Z (Función Objetivo)
+                [0, 1,                1,                1,  0,  r1Limit], // Fila s1 (Restricción 1)
+                [0, 2,                1,                0,  1,  r2Limit]  // Fila s2 (Restricción 2)
+            ];
+
+            const MAX_ITERATIONS = 10; // Para evitar bucles infinitos
+            for (let iter = 0; iter < MAX_ITERATIONS; iter++) {
+                // 2. Encontrar la columna pivote (el más negativo en la fila Z)
+                const zRow = tableau[0];
+                let pivotColIndex = -1;
+                let minZValue = 0;
+                for (let j = 1; j < zRow.length - 1; j++) { // Ignorar Z y Solución
+                    if (zRow[j] < minZValue) {
+                        minZValue = zRow[j];
+                        pivotColIndex = j;
+                    }
+                }
+
+                // 3. Si no hay negativos, hemos llegado a la solución óptima
+                if (pivotColIndex === -1) break;
+
+                // 4. Encontrar la fila pivote (menor ratio positivo)
+                let pivotRowIndex = -1;
+                let minRatio = Infinity;
+                for (let i = 1; i < tableau.length; i++) {
+                    const pivotColValue = tableau[i][pivotColIndex];
+                    if (pivotColValue > 0) {
+                        const ratio = tableau[i][tableau[i].length - 1] / pivotColValue;
+                        if (ratio < minRatio) {
+                            minRatio = ratio;
+                            pivotRowIndex = i;
+                        }
+                    }
+                }
+
+                // 5. Realizar el pivoteo
+                const pivotElement = tableau[pivotRowIndex][pivotColIndex];
+                // Normalizar la fila pivote
+                for (let j = 0; j < tableau[pivotRowIndex].length; j++) {
+                    tableau[pivotRowIndex][j] /= pivotElement;
+                }
+                // Hacer ceros en las otras filas de la columna pivote
+                for (let i = 0; i < tableau.length; i++) {
+                    if (i !== pivotRowIndex) {
+                        const factor = tableau[i][pivotColIndex];
+                        for (let j = 0; j < tableau[i].length; j++) {
+                            tableau[i][j] -= factor * tableau[pivotRowIndex][j];
+                        }
+                    }
+                }
+            }
+
+            return extractSolutionFromTableau(tableau);
+        }
+
+        /**
+         * Extrae los valores de las variables de decisión del tableau final.
+         * @param {number[][]} tableau - El tableau Simplex final.
+         * @returns {{x: number, y: number, z: number}} La solución.
+         */
+        function extractSolutionFromTableau(tableau) {
+            const numRows = tableau.length;
+            const numCols = tableau[0].length;
+            const solutionColIndex = numCols - 1;
+            let solution = { x: 0, y: 0, z: tableau[0][solutionColIndex] };
+
+            // Las variables de decisión son X (col 1) y Y (col 2)
+            for (let j = 1; j <= 2; j++) { // j=1 para X, j=2 para Y
+                let isBasic = false;
+                let pivotRow = -1;
+                let oneCount = 0;
+                let zeroCount = 0;
+
+                for (let i = 1; i < numRows; i++) {
+                    if (tableau[i][j] === 1) {
+                        oneCount++;
+                        pivotRow = i;
+                    } else if (tableau[i][j] === 0) {
+                        zeroCount++;
+                    }
+                }
+
+                if (oneCount === 1 && zeroCount === numRows - 2) { // Es una variable básica
+                    if (j === 1) solution.x = tableau[pivotRow][solutionColIndex];
+                    if (j === 2) solution.y = tableau[pivotRow][solutionColIndex];
+                }
+            }
+            return solution;
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 }).format(value);
+        }
+
+        function updateAnalysis() {
+            const r1Limit = parseFloat(document.getElementById('r1Slider').value);
+            const r2Limit = parseFloat(document.getElementById('r2Slider').value);
+
+            // Actualizar etiquetas de los sliders
+            document.getElementById('r1Value').textContent = r1Limit;
+            document.getElementById('r2Value').textContent = r2Limit;
+
+            // Actualizar texto de las restricciones en el resumen
+            document.getElementById('restriction1Text').textContent = `R1: X + Y ≤ ${r1Limit}`;
+            document.getElementById('restriction2Text').textContent = `R2: 2X + Y ≤ ${r2Limit}`;
+
+            // --- CÁLCULO DE VÉRTICES Y ÓPTIMO ---
+            const puntoCruce = calcularInterseccion(r1Limit, r2Limit);
+
+            const vertices = [
+                {x: 0, y: 0},
+                {x: r2Limit / 2, y: 0},
+                puntoCruce,
+                {x: 0, y: r1Limit}
+            ].filter(p => esPuntoFactible(p.x, p.y, r1Limit, r2Limit)); // Filtrar solo los vértices válidos
+
+            const solucionSimplex = solveWithSimplex(r1Limit, r2Limit);
+            const xOptimo = solucionSimplex.x;
+            const yOptimo = solucionSimplex.y;
+            const valorOptimo = solucionSimplex.z;
+
+            document.getElementById('resultadoTexto').innerHTML = `
+                <div class="col-span-2">
+                    <span class="text-lg">Ganancia Máxima (Z):</span>
+                    <span class="font-bold text-2xl text-green-900 ml-2">${formatCurrency(valorOptimo)}</span>
+                    <span class="font-mono text-sm ml-2">en (${xOptimo.toFixed(2)}, ${yOptimo.toFixed(2)})</span>
+                </div>
+                <div><span class="font-semibold">${xOptimo.toFixed(0)}</span> Técnicos de Hora Pico (X)</div>
+                <div><span class="font-semibold">${yOptimo.toFixed(0)}</span> Técnicos de Horario Regular (Y)</div>
+            `;
+
+            const valorRelativoOptimo = C_X_REL * xOptimo + C_Y_REL * yOptimo;
+
+            // --- PREPARACIÓN DE DATOS PARA EL GRÁFICO ---
+            const MAX_AXIS = 20;
+            const r1Points = [], r2Points = [], foLinePoints = [];
+
+            for(let x = 0; x <= MAX_AXIS; x += 0.1) {
+                let y1 = r1Limit - x;
+                if (y1 >= 0) r1Points.push({x: x, y: y1});
+
+                let y2 = r2Limit - 2 * x;
+                if (y2 >= 0) r2Points.push({x: x, y: y2});
                 
-                return {
-                    dia: dia.dia,
-                    manana: Math.max(1, Math.round(personalDia * (dia.mananaPredicha / demandaDia))),
-                    tarde: Math.max(2, Math.round(personalDia * (dia.tardePredicha / demandaDia))),
-                    noche: Math.max(1, Math.round(personalDia * (dia.nochePredicha / demandaDia)))
-                };
-            });
-        }
-
-        function procesarDatos() {
-            // Obtener valores
-            const inversionInicial = document.getElementById('inversionInicial').value;
-            const tasaDescuento = document.getElementById('tasaDescuento').value;
-            const ingresosProyectados = document.getElementById('ingresosProyectados').value;
-            const costosOperativos = document.getElementById('costosOperativos').value;
-            const personalDisponible = document.getElementById('personalDisponible').value;
-            const presupuestoDisponible = document.getElementById('presupuestoDisponible').value;
-
-            // Validar campos básicos
-            if (!inversionInicial || !tasaDescuento || !personalDisponible || !presupuestoDisponible) {
-                alert('Por favor completa todos los campos financieros');
-                return;
+                let y_fo = (valorRelativoOptimo - C_X_REL * x) / C_Y_REL;
+                if (y_fo >= 0) foLinePoints.push({x: x, y: y_fo});
             }
-
-            // Convertir ingresos y costos
-            const ingresos = ingresosProyectados.split(',').map(v => parseFloat(v.trim()));
-            const costos = costosOperativos.split(',').map(v => parseFloat(v.trim()));
-
-            if (ingresos.length !== 12 || costos.length !== 12 || ingresos.some(isNaN) || costos.some(isNaN)) {
-                alert('Debes ingresar exactamente 12 valores numéricos para ingresos y costos (uno por mes)');
-                return;
+            
+            // --- CREACIÓN DEL GRÁFICO ---
+            if (simplexChartInstance) {
+                simplexChartInstance.destroy(); // Destruir el gráfico anterior
             }
-
-            // Obtener demanda histórica
-            const dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-            const demandaManana = document.querySelectorAll('.demanda-manana');
-            const demandaTarde = document.querySelectorAll('.demanda-tarde');
-            const demandaNoche = document.querySelectorAll('.demanda-noche');
-
-            const demandaHistorica = [];
-            for (let i = 0; i < 7; i++) {
-                const manana = parseFloat(demandaManana[i].value);
-                const tarde = parseFloat(demandaTarde[i].value);
-                const noche = parseFloat(demandaNoche[i].value);
-
-                if (isNaN(manana) || isNaN(tarde) || isNaN(noche)) {
-                    alert('Por favor completa todos los datos de demanda histórica');
-                    return;
-                }
-
-                demandaHistorica.push({
-                    dia: dias[i],
-                    manana: manana,
-                    tarde: tarde,
-                    noche: noche
-                });
-            }
-
-            // Calcular indicadores financieros
-            const inversion = parseFloat(inversionInicial);
-            const tasa = parseFloat(tasaDescuento) / 100;
+            const ctx = document.getElementById('simplexChart').getContext('2d');
             
-            const roi = calcularROI(inversion, ingresos, costos);
-            const van = calcularVAN(inversion, ingresos, costos, tasa);
-            const tir = calcularTIR(inversion, ingresos, costos);
-
-            // Predecir demanda
-            const demandaPredicha = predecirDemanda(demandaHistorica);
-
-            // Asignar personal
-            const asignacionOptima = asignarPersonal(demandaPredicha, parseFloat(personalDisponible));
-
-            // Guardar datos globales
-            datosGlobales = {
-                inversionInicial: inversion,
-                tasaDescuento: parseFloat(tasaDescuento),
-                ingresos: ingresos,
-                costos: costos,
-                personalDisponible: parseFloat(personalDisponible),
-                presupuestoDisponible: parseFloat(presupuestoDisponible),
-                roi: roi,
-                van: van,
-                tir: tir,
-                demandaHistorica: demandaHistorica,
-                demandaPredicha: demandaPredicha,
-                asignacionOptima: asignacionOptima
-            };
-
-            // Mostrar resultados
-            mostrarResultados();
-        }
-
-        function mostrarResultados() {
-            document.getElementById('inputSection').style.display = 'none';
-            document.getElementById('resultsSection').style.display = 'block';
-
-            // Actualizar valores
-            document.getElementById('roiValue').textContent = datosGlobales.roi + '%';
-            document.getElementById('vanValue').textContent = `$${parseFloat(datosGlobales.van).toLocaleString()}`; // Corregido
-            document.getElementById('tirValue').textContent = datosGlobales.tir + '%';
-            document.getElementById('personalValue').textContent = datosGlobales.personalDisponible;
-            document.getElementById('presupuestoValue').textContent = `$${datosGlobales.presupuestoDisponible.toLocaleString()}`; // Corregido
-
-            // Crear gráficos
-            crearGraficoFlujoCaja();
-            crearGraficoDemanda();
-            crearGraficoPersonal();
-            llenarTablaDemanda();
-            llenarTablaAsignacion();
-            llenarReporte();
-        }
-
-        function crearGraficoFlujoCaja() {
-            const ctx = document.getElementById('flujoCajaChart');
-            if (charts.flujoCaja) charts.flujoCaja.destroy();
-
-            const meses = Array.from({length: 12}, (_, i) => `Mes ${i + 1}`);
-            const flujoNeto = datosGlobales.ingresos.map((ing, i) => ing - datosGlobales.costos[i]);
-
-            charts.flujoCaja = new Chart(ctx, {
-                type: 'line',
+            simplexChartInstance = new Chart(ctx, {
+                type: 'scatter',
                 data: {
-                    labels: meses,
                     datasets: [
                         {
-                            label: 'Ingresos',
-                            data: datosGlobales.ingresos,
-                            borderColor: '#10b981',
-                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-                            tension: 0.4,
-                            borderWidth: 3
+                            label: 'R1: Límite Total',
+                            data: r1Points,
+                            borderColor: 'rgb(59, 130, 246)', 
+                            borderWidth: 3,
+                            showLine: true,
+                            pointRadius: 0
                         },
                         {
-                            label: 'Costos',
-                            data: datosGlobales.costos,
-                            borderColor: '#ef4444',
-                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                            tension: 0.4,
-                            borderWidth: 3
+                            label: 'R2: Carga Pico',
+                            data: r2Points,
+                            borderColor: 'rgb(239, 68, 68)', 
+                            borderWidth: 3,
+                            showLine: true,
+                            pointRadius: 0
                         },
                         {
-                            label: 'Flujo Neto',
-                            data: flujoNeto,
-                            borderColor: '#3b82f6',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                            tension: 0.4,
-                            borderWidth: 3
+                            label: 'Región Factible',
+                            data: vertices.concat(vertices[0]), // Cerrar el polígono
+                            backgroundColor: 'rgba(168, 85, 247, 0.3)', 
+                            borderColor: 'rgba(168, 85, 247, 0.7)',
+                            borderWidth: 1,
+                            fill: true,
+                            showLine: true,
+                            tension: 0,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Función Objetivo (Z máx)',
+                            data: foLinePoints,
+                            borderColor: 'rgb(22, 163, 74)', 
+                            borderWidth: 3,
+                            borderDash: [10, 5],
+                            showLine: true,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Punto Óptimo',
+                            data: [{x: xOptimo, y: yOptimo, label: `Óptimo (${xOptimo}, ${yOptimo})`}],
+                            backgroundColor: 'rgb(255, 193, 7)', 
+                            borderColor: 'rgb(0, 0, 0)',
+                            borderWidth: 1,
+                            pointRadius: 8,
+                            pointStyle: 'star'
                         }
                     ]
                 },
@@ -572,303 +329,32 @@
                     responsive: true,
                     maintainAspectRatio: true,
                     plugins: {
-                        legend: {
-                            labels: { color: '#fff' }
+                        legend: { position: 'top' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.dataset.label === 'Punto Óptimo') {
+                                        return `Óptimo: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)}) - Z = ${formatCurrency(valorOptimo)}`;
+                                    }
+                                    return `${context.dataset.label}: (${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
+                                }
+                            }
                         }
                     },
                     scales: {
-                        y: {
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        x: {
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
+                        x: { min: 0, max: MAX_AXIS, title: { display: true, text: 'X (Técnicos de Hora Pico)', font: { size: 14, weight: 'bold' } } },
+                        y: { min: 0, max: MAX_AXIS, title: { display: true, text: 'Y (Técnicos de Horario Regular)', font: { size: 14, weight: 'bold' } } }
                     }
                 }
             });
         }
 
-        function crearGraficoDemanda() {
-            const ctx = document.getElementById('demandaChart');
-            if (charts.demanda) charts.demanda.destroy();
+        // Event Listeners para los sliders
+        document.getElementById('r1Slider').addEventListener('input', updateAnalysis);
+        document.getElementById('r2Slider').addEventListener('input', updateAnalysis);
 
-            const dias = datosGlobales.demandaPredicha.map(d => d.dia);
-
-            charts.demanda = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dias,
-                    datasets: [
-                        {
-                            label: 'Mañana (Histórica)',
-                            data: datosGlobales.demandaHistorica.map(d => d.manana),
-                            backgroundColor: '#fbbf24'
-                        },
-                        {
-                            label: 'Mañana (Predicha)',
-                            data: datosGlobales.demandaPredicha.map(d => d.mananaPredicha),
-                            backgroundColor: '#f59e0b'
-                        },
-                        {
-                            label: 'Tarde (Histórica)',
-                            data: datosGlobales.demandaHistorica.map(d => d.tarde),
-                            backgroundColor: '#3b82f6'
-                        },
-                        {
-                            label: 'Tarde (Predicha)',
-                            data: datosGlobales.demandaPredicha.map(d => d.tardePredicha),
-                            backgroundColor: '#2563eb'
-                        },
-                        {
-                            label: 'Noche (Histórica)',
-                            data: datosGlobales.demandaHistorica.map(d => d.noche),
-                            backgroundColor: '#8b5cf6'
-                        },
-                        {
-                            label: 'Noche (Predicha)',
-                            data: datosGlobales.demandaPredicha.map(d => d.nochePredicha),
-                            backgroundColor: '#7c3aed'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#fff' }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        x: {
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    }
-                }
-            }); // Corregido: Removido un corchete extra
-
-            // Crear gráfico para reporte
-            const ctx2 = document.getElementById('demandaReportChart');
-            if (charts.demandaReport) charts.demandaReport.destroy();
-
-            charts.demandaReport = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: dias,
-                    datasets: [
-                        {
-                            label: 'Demanda Histórica (Tarde)',
-                            data: datosGlobales.demandaHistorica.map(d => d.tarde),
-                            backgroundColor: '#3b82f6'
-                        },
-                        {
-                            label: 'Demanda Predicha (Tarde)',
-                            data: datosGlobales.demandaPredicha.map(d => d.tardePredicha),
-                            backgroundColor: '#10b981'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#fff' }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        x: {
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    }
-                }
-            }); // Corregido: Removido un corchete extra
-        }
-
-        function crearGraficoPersonal() {
-            const ctx = document.getElementById('personalChart');
-            if (charts.personal) charts.personal.destroy();
-
-            const dias = datosGlobales.asignacionOptima.map(d => d.dia);
-
-            charts.personal = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: dias,
-                    datasets: [
-                        {
-                            label: 'Mañana',
-                            data: datosGlobales.asignacionOptima.map(d => d.manana),
-                            backgroundColor: '#fbbf24'
-                        },
-                        {
-                            label: 'Tarde',
-                            data: datosGlobales.asignacionOptima.map(d => d.tarde),
-                            backgroundColor: '#3b82f6'
-                        },
-                        {
-                            label: 'Noche',
-                            data: datosGlobales.asignacionOptima.map(d => d.noche),
-                            backgroundColor: '#8b5cf6'
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: {
-                        legend: {
-                            labels: { color: '#fff' }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            stacked: true,
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        },
-                        x: {
-                            stacked: true,
-                            ticks: { color: '#fff' },
-                            grid: { color: 'rgba(255, 255, 255, 0.1)' }
-                        }
-                    }
-                }
-            }); // Corregido: Removido un corchete extra
-        }
-
-        function llenarTablaDemanda() {
-            const tbody = document.getElementById('demandaPredictedTable');
-            tbody.innerHTML = '';
-
-            datosGlobales.demandaPredicha.forEach(dia => {
-                const total = dia.mananaPredicha + dia.tardePredicha + dia.nochePredicha;
-                const row = `
-                    <tr class="border-b border-white/10 hover:bg-white/5">
-                        <td class="p-3 font-semibold">${dia.dia}</td>
-                        <td class="text-center p-3">${dia.mananaPredicha}</td>
-                        <td class="text-center p-3">${dia.tardePredicha}</td>
-                        <td class="text-center p-3">${dia.nochePredicha}</td>
-                        <td class="text-center p-3 font-bold text-blue-300">${total}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-        }
-
-        function llenarTablaAsignacion() {
-            const tbody = document.getElementById('asignacionTable');
-            tbody.innerHTML = '';
-
-            datosGlobales.asignacionOptima.forEach(dia => {
-                const total = dia.manana + dia.tarde + dia.noche;
-                const row = `
-                    <tr class="border-b border-white/10 hover:bg-white/5">
-                        <td class="p-3 font-semibold">${dia.dia}</td>
-                        <td class="text-center p-3">
-                            <span class="bg-yellow-500/20 px-3 py-1 rounded-full">${dia.manana} empleados</span>
-                        </td>
-                        <td class="text-center p-3">
-                            <span class="bg-blue-500/20 px-3 py-1 rounded-full">${dia.tarde} empleados</span>
-                        </td>
-                        <td class="text-center p-3">
-                            <span class="bg-purple-500/20 px-3 py-1 rounded-full">${dia.noche} empleados</span>
-                        </td>
-                        <td class="text-center p-3 font-bold text-green-300">${total}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
-
-            // Llenar tabla de reporte
-            const tbody2 = document.getElementById('reportAsignacionTable');
-            tbody2.innerHTML = '';
-
-            datosGlobales.asignacionOptima.forEach(dia => {
-                const row = `
-                    <tr class="border-b border-white/10">
-                        <td class="p-3 font-semibold">${dia.dia}</td>
-                        <td class="text-center p-3">${dia.manana} empleados</td>
-                        <td class="text-center p-3">${dia.tarde} empleados</td>
-                        <td class="text-center p-3">${dia.noche} empleados</td>
-                    </tr>
-                `;
-                tbody2.innerHTML += row;
-            });
-        }
-
-        function llenarReporte() {
-            // Valores del reporte
-            document.getElementById('reportRoi').textContent = datosGlobales.roi + '%';
-            document.getElementById('reportVan').textContent = `$${parseFloat(datosGlobales.van).toLocaleString()}`; // Corregido
-            document.getElementById('reportTir').textContent = datosGlobales.tir + '%';
-
-            // Análisis
-            const ingresoTotal = datosGlobales.ingresos.reduce((a, b) => a + b, 0);
-            const analisis = document.getElementById('reportAnalysis');
-            analisis.innerHTML = `
-                <p>• La inversión de $${datosGlobales.inversionInicial.toLocaleString()} genera un ROI de ${datosGlobales.roi}%.</p>
-                <p>• El VAN es de $${parseFloat(datosGlobales.van).toLocaleString()}, indicando ${parseFloat(datosGlobales.van) > 0 ? 'que el proyecto agrega valor' : 'que requiere ajustes'}.</p>
-                <p>• La TIR de ${datosGlobales.tir}% ${parseFloat(datosGlobales.tir) > datosGlobales.tasaDescuento ? 'supera' : 'está por debajo de'} la tasa de descuento del ${datosGlobales.tasaDescuento}%.</p>
-                <p>• Los ingresos proyectados totales son de $${ingresoTotal.toLocaleString()} en 12 meses.</p>
-            `;
-
-            // Total clientes
-            const totalClientes = datosGlobales.demandaPredicha.reduce((acc, dia) => 
-                acc + dia.mananaPredicha + dia.tardePredicha + dia.nochePredicha, 0
-            );
-            document.getElementById('totalClientes').textContent = `• Total de clientes predichos: ${totalClientes}`;
-
-            // Personal
-            document.getElementById('reportPersonal').textContent = `Distribución óptima de ${datosGlobales.personalDisponible} empleados según demanda predicha`;
-            document.getElementById('reportPresupuesto').textContent = `• Presupuesto disponible: $${datosGlobales.presupuestoDisponible.toLocaleString()} para capacitación y recursos.`;
-
-            // Conclusiones
-            const conclusiones = document.getElementById('reportConclusiones');
-            conclusiones.innerHTML = `
-                <p>✓ El sistema integra exitosamente el análisis financiero con la gestión operativa.</p>
-                <p>✓ La predicción de demanda permite anticipar picos de atención y ajustar recursos.</p>
-                <p>✓ La optimización de personal reduce costos innecesarios y maximiza eficiencia.</p>
-                <p>✓ Los indicadores ROI (${datosGlobales.roi}%), VAN ($${parseFloat(datosGlobales.van).toLocaleString()}) y TIR (${datosGlobales.tir}%) confirman viabilidad financiera.</p>
-                <p>✓ La implementación fortalece la rentabilidad y sostenibilidad de Control Total S.A.S.</p>
-            `;
-        }
-
-        function cambiarTab(tab) {
-            // Ocultar todos los contenidos
-            document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-            
-            // Remover clase activa de todos los tabs
-            document.querySelectorAll('[id^="tab"]').forEach(el => {
-                el.classList.remove('bg-blue-500', 'text-white', 'shadow-lg');
-                el.classList.add('text-blue-200', 'hover:bg-white/10');
-            });
-
-            // Mostrar contenido seleccionado
-            document.getElementById('content' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block';
-            
-            // Activar tab seleccionado
-            const activeTab = document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1));
-            activeTab.classList.add('bg-blue-500', 'text-white', 'shadow-lg');
-            activeTab.classList.remove('text-blue-200', 'hover:bg-white/10');
-        }
-
-        function volverInput() {
-            document.getElementById('resultsSection').style.display = 'none';
-            document.getElementById('inputSection').style.display = 'block';
-        }
+        // Carga inicial
+        window.onload = updateAnalysis;
     </script>
 </body>
 </html>
